@@ -1,17 +1,22 @@
 from flask import Flask, render_template, request, redirect
 from google import genai
+from dotenv import load_dotenv
 import sqlite3
 import requests
 from datetime import date, datetime, timedelta
 import os
 
+#SETUP
+
+load_dotenv()
+
 app = Flask(__name__)
 DATABASE = "paytracker.db"
 
-client = genai.Client(api_key="AQ.Ab8RN6IgUDlOWjLiAS474kon_Qk56OtRPKr-KqI5PwZWfJimug")
+client = genai.Client(api_key=os.environ.get("GENAI_API_KEY"))
+#api key has been put into a .gitignore file so it is not shared publicly. It is stored in a .env file and loaded using the dotenv library
 
-# ── DATABASE SETUP ───────────────────────────────────
-
+#DATABASE SETUP
 def create_database():
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
@@ -52,7 +57,7 @@ def create_database():
     connection.commit()
     connection.close()
 
-# ── ROUTES ───────────────────────────────────────────
+#ROUTES
 
 @app.route("/")
 def index():
@@ -60,6 +65,42 @@ def index():
 
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+
+    
+    cursor.execute("SELECT * FROM settings")
+    settings = cursor.fetchone()
+    connection.close()
+
+    
+    if settings and settings[3] == 1:
+        return redirect("/")
+
+    if request.method == "POST":
+        weekday_rate = request.form["weekday_rate"]
+        weekend_rate = request.form["weekend_rate"]
+        public_holiday_rate = request.form["public_holiday_rate"]
+        savings_goal = request.form["savings_goal"]
+        avg_weekly_spending = request.form["avg_weekly_spending"]
+
+        connection = sqlite3.connect(DATABASE)
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            INSERT INTO pay_rates (weekday_rate, weekend_rate, public_holiday_rate)
+            VALUES (?, ?, ?)
+        """, (weekday_rate, weekend_rate, public_holiday_rate))
+
+        cursor.execute("""
+            INSERT INTO settings (savings_goal, avg_weekly_spending, setup_complete)
+            VALUES (?, ?, 1)
+        """, (savings_goal, avg_weekly_spending))
+
+        connection.commit()
+        connection.close()
+        return redirect("/")    
+
     return render_template("setup.html")
 
 @app.route("/shifts", methods=["GET", "POST"])
@@ -78,7 +119,7 @@ def ai():
 def settings_page():
     return render_template("settings.html")
 
-# ── RUN ──────────────────────────────────────────────
+#RUN
 
 if __name__ == "__main__":
     create_database()

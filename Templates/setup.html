@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Pay Tracker - Setup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Setup</h1>
+        <p>Enter your details to get started</p>
+
+        <form action="/setup" method="post">
+
+            <h2>Pay rates</h2>
+            <label>Weekday rate</label>
+            <input type="number" name="weekday_rate" step="0.01" required>
+
+            <label>Weekend rate</label>
+            <input type="number" name="weekend_rate" step="0.01" required>
+
+            <label>Public holiday rate</label>
+            <input type="number" name="public_holiday_rate" step="0.01" required>
+
+            <h2>Savings goal</h2>
+            <label>Savings goal</label>
+            <input type="number" name="savings_goal" step="0.01" required> 
+
+            <label>Average weekly spending</label>
+            <input type="number" name="avg_weekly_spending" step="0.01" required> 
+
+            <button type="submit">Save settings</button>
+        </form>
+    </div>
+</body>
+</html>
