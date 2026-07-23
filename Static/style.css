@@ -90,3 +90,16 @@ button {
     font-size: 15px;
     cursor: pointer;
 }   
+.cards-row {
+    display: flex;
+    gap: 5px;
+}
+
+.card {
+    flex: 1;
+}
+
+.card-container {
+    padding: 10px 16px;
+    text-align: center;
+}
