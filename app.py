@@ -61,7 +61,17 @@ def create_database():
 
 @app.route("/")
 def index():
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM settings")
+    settings = cursor.fetchone()
+    connection.close()
+
+    if not settings or settings[3] == 0:
+        return redirect("/setup")
+
     return render_template("index.html")
+
 
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
